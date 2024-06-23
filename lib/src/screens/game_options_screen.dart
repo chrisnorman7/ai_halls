@@ -1,5 +1,6 @@
 import 'package:backstreets_widgets/screens.dart';
 import 'package:backstreets_widgets/widgets.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,6 +39,7 @@ class GameOptionsScreen extends ConsumerWidget {
                 value: options.apiKey ?? '',
                 onChanged: (final apiKey) async {
                   options.apiKey = apiKey;
+                  OpenAI.apiKey = apiKey;
                   await options.save(ref: ref, invalidateProviders: true);
                 },
                 header: 'Open AI API Key',

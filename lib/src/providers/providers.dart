@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../database/database.dart';
 import '../json/game_options.dart';
 
 part 'providers.g.dart';
@@ -43,3 +44,20 @@ Future<GameOptions> gameOptions(final GameOptionsRef ref) async {
 /// Provide the text-to-speech system.
 @riverpod
 FlutterTts tts(final TtsRef ref) => FlutterTts();
+
+/// Provide the database.
+@Riverpod(keepAlive: true)
+Future<Database> database(final DatabaseRef ref) async {
+  final directory = await ref.read(stateDirectoryProvider.future);
+  final file = File(path.join(directory.path, 'db.sqlite3'));
+  final database = Database(file);
+  ref.onDispose(database.close);
+  return database;
+}
+
+/// Provide all worlds.
+@riverpod
+Future<List<World>> worlds(final WorldsRef ref) async {
+  final database = await ref.watch(databaseProvider.future);
+  return database.worldsDao.getWorlds();
+}

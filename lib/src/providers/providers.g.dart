@@ -72,5 +72,37 @@ final ttsProvider = AutoDisposeProvider<FlutterTts>.internal(
 );
 
 typedef TtsRef = AutoDisposeProviderRef<FlutterTts>;
+String _$databaseHash() => r'ad63a472ddd58969ade5653d7748d223b7d42edd';
+
+/// Provide the database.
+///
+/// Copied from [database].
+@ProviderFor(database)
+final databaseProvider = FutureProvider<Database>.internal(
+  database,
+  name: r'databaseProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$databaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef DatabaseRef = FutureProviderRef<Database>;
+String _$worldsHash() => r'072c0ff1d798e15df5d2750ae807c0cb22ef27de';
+
+/// Provide all worlds.
+///
+/// Copied from [worlds].
+@ProviderFor(worlds)
+final worldsProvider = AutoDisposeFutureProvider<List<World>>.internal(
+  worlds,
+  name: r'worldsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$worldsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef WorldsRef = AutoDisposeFutureProviderRef<List<World>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
