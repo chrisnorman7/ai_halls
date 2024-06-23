@@ -1,0 +1,22 @@
+{
+  "name": "The name of this room",
+  "ambiance": "A random entry from {ambiances}",
+  "width": "The width of this room in metres as an integer",
+  "length": "The length of this room in metres as an integer",
+  "objects": [
+    {
+      "name": "The name of this object",
+      "description": "The description of this object",
+      "x": "The number of metres across the room where this object lives. Should be less than `width`",
+      "y": "The number of metres into the room where this object lives. Should be less than `length`"
+    }
+  ],
+  "exits": [
+    {
+      "name": "The name of this exit",
+      "description": "The description of this exit",
+      "x": "The number of metres across the room where this exit lives. Should be less than `width`",
+      "y": "The number of metres into the room where this exit lives. Should be less than `length`"
+    }
+  ]
+}
