@@ -104,5 +104,164 @@ final worldsProvider = AutoDisposeFutureProvider<List<World>>.internal(
 );
 
 typedef WorldsRef = AutoDisposeFutureProviderRef<List<World>>;
+String _$worldHash() => r'a234ed1918c19ec750af8e73c686731fddbe843a';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// Provide a single world.
+///
+/// Copied from [world].
+@ProviderFor(world)
+const worldProvider = WorldFamily();
+
+/// Provide a single world.
+///
+/// Copied from [world].
+class WorldFamily extends Family<AsyncValue<World>> {
+  /// Provide a single world.
+  ///
+  /// Copied from [world].
+  const WorldFamily();
+
+  /// Provide a single world.
+  ///
+  /// Copied from [world].
+  WorldProvider call(
+    int id,
+  ) {
+    return WorldProvider(
+      id,
+    );
+  }
+
+  @override
+  WorldProvider getProviderOverride(
+    covariant WorldProvider provider,
+  ) {
+    return call(
+      provider.id,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'worldProvider';
+}
+
+/// Provide a single world.
+///
+/// Copied from [world].
+class WorldProvider extends AutoDisposeFutureProvider<World> {
+  /// Provide a single world.
+  ///
+  /// Copied from [world].
+  WorldProvider(
+    int id,
+  ) : this._internal(
+          (ref) => world(
+            ref as WorldRef,
+            id,
+          ),
+          from: worldProvider,
+          name: r'worldProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$worldHash,
+          dependencies: WorldFamily._dependencies,
+          allTransitiveDependencies: WorldFamily._allTransitiveDependencies,
+          id: id,
+        );
+
+  WorldProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.id,
+  }) : super.internal();
+
+  final int id;
+
+  @override
+  Override overrideWith(
+    FutureOr<World> Function(WorldRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: WorldProvider._internal(
+        (ref) => create(ref as WorldRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        id: id,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<World> createElement() {
+    return _WorldProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WorldProvider && other.id == id;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, id.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin WorldRef on AutoDisposeFutureProviderRef<World> {
+  /// The parameter `id` of this provider.
+  int get id;
+}
+
+class _WorldProviderElement extends AutoDisposeFutureProviderElement<World>
+    with WorldRef {
+  _WorldProviderElement(super.provider);
+
+  @override
+  int get id => (origin as WorldProvider).id;
+}
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

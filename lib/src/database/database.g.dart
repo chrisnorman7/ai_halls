@@ -28,8 +28,14 @@ class $WorldsTable extends Worlds with TableInfo<$WorldsTable, World> {
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _firstRoomIdMeta =
+      const VerificationMeta('firstRoomId');
   @override
-  List<GeneratedColumn> get $columns => [id, name, description];
+  late final GeneratedColumn<int> firstRoomId = GeneratedColumn<int>(
+      'first_room_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, description, firstRoomId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -57,6 +63,12 @@ class $WorldsTable extends Worlds with TableInfo<$WorldsTable, World> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
+    if (data.containsKey('first_room_id')) {
+      context.handle(
+          _firstRoomIdMeta,
+          firstRoomId.isAcceptableOrUnknown(
+              data['first_room_id']!, _firstRoomIdMeta));
+    }
     return context;
   }
 
@@ -72,6 +84,8 @@ class $WorldsTable extends Worlds with TableInfo<$WorldsTable, World> {
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      firstRoomId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}first_room_id']),
     );
   }
 
@@ -90,14 +104,23 @@ class World extends DataClass implements Insertable<World> {
 
   /// The description column.
   final String description;
+
+  /// The ID of the first room.
+  final int? firstRoomId;
   const World(
-      {required this.id, required this.name, required this.description});
+      {required this.id,
+      required this.name,
+      required this.description,
+      this.firstRoomId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['description'] = Variable<String>(description);
+    if (!nullToAbsent || firstRoomId != null) {
+      map['first_room_id'] = Variable<int>(firstRoomId);
+    }
     return map;
   }
 
@@ -106,6 +129,9 @@ class World extends DataClass implements Insertable<World> {
       id: Value(id),
       name: Value(name),
       description: Value(description),
+      firstRoomId: firstRoomId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstRoomId),
     );
   }
 
@@ -116,6 +142,7 @@ class World extends DataClass implements Insertable<World> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String>(json['description']),
+      firstRoomId: serializer.fromJson<int?>(json['firstRoomId']),
     );
   }
   @override
@@ -125,68 +152,86 @@ class World extends DataClass implements Insertable<World> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String>(description),
+      'firstRoomId': serializer.toJson<int?>(firstRoomId),
     };
   }
 
-  World copyWith({int? id, String? name, String? description}) => World(
+  World copyWith(
+          {int? id,
+          String? name,
+          String? description,
+          Value<int?> firstRoomId = const Value.absent()}) =>
+      World(
         id: id ?? this.id,
         name: name ?? this.name,
         description: description ?? this.description,
+        firstRoomId: firstRoomId.present ? firstRoomId.value : this.firstRoomId,
       );
   @override
   String toString() {
     return (StringBuffer('World(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('firstRoomId: $firstRoomId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description);
+  int get hashCode => Object.hash(id, name, description, firstRoomId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is World &&
           other.id == this.id &&
           other.name == this.name &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.firstRoomId == this.firstRoomId);
 }
 
 class WorldsCompanion extends UpdateCompanion<World> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> description;
+  final Value<int?> firstRoomId;
   const WorldsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.firstRoomId = const Value.absent(),
   });
   WorldsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String description,
+    this.firstRoomId = const Value.absent(),
   })  : name = Value(name),
         description = Value(description);
   static Insertable<World> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<int>? firstRoomId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (firstRoomId != null) 'first_room_id': firstRoomId,
     });
   }
 
   WorldsCompanion copyWith(
-      {Value<int>? id, Value<String>? name, Value<String>? description}) {
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String>? description,
+      Value<int?>? firstRoomId}) {
     return WorldsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      firstRoomId: firstRoomId ?? this.firstRoomId,
     );
   }
 
@@ -202,6 +247,9 @@ class WorldsCompanion extends UpdateCompanion<World> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (firstRoomId.present) {
+      map['first_room_id'] = Variable<int>(firstRoomId.value);
+    }
     return map;
   }
 
@@ -210,7 +258,8 @@ class WorldsCompanion extends UpdateCompanion<World> {
     return (StringBuffer('WorldsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('firstRoomId: $firstRoomId')
           ..write(')'))
         .toString();
   }
@@ -235,6 +284,12 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _worldIdMeta =
       const VerificationMeta('worldId');
   @override
@@ -245,7 +300,7 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES worlds (id) ON DELETE CASCADE'));
   @override
-  List<GeneratedColumn> get $columns => [id, name, worldId];
+  List<GeneratedColumn> get $columns => [id, name, description, worldId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -264,6 +319,14 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
     }
     if (data.containsKey('world_id')) {
       context.handle(_worldIdMeta,
@@ -284,6 +347,8 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
       worldId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}world_id'])!,
     );
@@ -302,14 +367,22 @@ class Room extends DataClass implements Insertable<Room> {
   /// The name column.
   final String name;
 
+  /// The description column.
+  final String description;
+
   /// The ID of the world which rooms belong to.
   final int worldId;
-  const Room({required this.id, required this.name, required this.worldId});
+  const Room(
+      {required this.id,
+      required this.name,
+      required this.description,
+      required this.worldId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    map['description'] = Variable<String>(description);
     map['world_id'] = Variable<int>(worldId);
     return map;
   }
@@ -318,6 +391,7 @@ class Room extends DataClass implements Insertable<Room> {
     return RoomsCompanion(
       id: Value(id),
       name: Value(name),
+      description: Value(description),
       worldId: Value(worldId),
     );
   }
@@ -328,6 +402,7 @@ class Room extends DataClass implements Insertable<Room> {
     return Room(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String>(json['description']),
       worldId: serializer.fromJson<int>(json['worldId']),
     );
   }
@@ -337,13 +412,16 @@ class Room extends DataClass implements Insertable<Room> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String>(description),
       'worldId': serializer.toJson<int>(worldId),
     };
   }
 
-  Room copyWith({int? id, String? name, int? worldId}) => Room(
+  Room copyWith({int? id, String? name, String? description, int? worldId}) =>
+      Room(
         id: id ?? this.id,
         name: name ?? this.name,
+        description: description ?? this.description,
         worldId: worldId ?? this.worldId,
       );
   @override
@@ -351,54 +429,66 @@ class Room extends DataClass implements Insertable<Room> {
     return (StringBuffer('Room(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('worldId: $worldId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, worldId);
+  int get hashCode => Object.hash(id, name, description, worldId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Room &&
           other.id == this.id &&
           other.name == this.name &&
+          other.description == this.description &&
           other.worldId == this.worldId);
 }
 
 class RoomsCompanion extends UpdateCompanion<Room> {
   final Value<int> id;
   final Value<String> name;
+  final Value<String> description;
   final Value<int> worldId;
   const RoomsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.description = const Value.absent(),
     this.worldId = const Value.absent(),
   });
   RoomsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    required String description,
     required int worldId,
   })  : name = Value(name),
+        description = Value(description),
         worldId = Value(worldId);
   static Insertable<Room> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<String>? description,
     Expression<int>? worldId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (description != null) 'description': description,
       if (worldId != null) 'world_id': worldId,
     });
   }
 
   RoomsCompanion copyWith(
-      {Value<int>? id, Value<String>? name, Value<int>? worldId}) {
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String>? description,
+      Value<int>? worldId}) {
     return RoomsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      description: description ?? this.description,
       worldId: worldId ?? this.worldId,
     );
   }
@@ -412,6 +502,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
     if (worldId.present) {
       map['world_id'] = Variable<int>(worldId.value);
     }
@@ -423,6 +516,7 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     return (StringBuffer('RoomsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('worldId: $worldId')
           ..write(')'))
         .toString();
@@ -435,6 +529,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final $WorldsTable worlds = $WorldsTable(this);
   late final $RoomsTable rooms = $RoomsTable(this);
   late final WorldsDao worldsDao = WorldsDao(this as Database);
+  late final RoomsDao roomsDao = RoomsDao(this as Database);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -458,11 +553,13 @@ typedef $$WorldsTableInsertCompanionBuilder = WorldsCompanion Function({
   Value<int> id,
   required String name,
   required String description,
+  Value<int?> firstRoomId,
 });
 typedef $$WorldsTableUpdateCompanionBuilder = WorldsCompanion Function({
   Value<int> id,
   Value<String> name,
   Value<String> description,
+  Value<int?> firstRoomId,
 });
 
 class $$WorldsTableTableManager extends RootTableManager<
@@ -487,21 +584,25 @@ class $$WorldsTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> description = const Value.absent(),
+            Value<int?> firstRoomId = const Value.absent(),
           }) =>
               WorldsCompanion(
             id: id,
             name: name,
             description: description,
+            firstRoomId: firstRoomId,
           ),
           getInsertCompanionBuilder: ({
             Value<int> id = const Value.absent(),
             required String name,
             required String description,
+            Value<int?> firstRoomId = const Value.absent(),
           }) =>
               WorldsCompanion.insert(
             id: id,
             name: name,
             description: description,
+            firstRoomId: firstRoomId,
           ),
         ));
 }
@@ -536,6 +637,11 @@ class $$WorldsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<int> get firstRoomId => $state.composableBuilder(
+      column: $state.table.firstRoomId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   ComposableFilter roomsRefs(
       ComposableFilter Function($$RoomsTableFilterComposer f) f) {
     final $$RoomsTableFilterComposer composer = $state.composerBuilder(
@@ -567,16 +673,23 @@ class $$WorldsTableOrderingComposer
       column: $state.table.description,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get firstRoomId => $state.composableBuilder(
+      column: $state.table.firstRoomId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
 typedef $$RoomsTableInsertCompanionBuilder = RoomsCompanion Function({
   Value<int> id,
   required String name,
+  required String description,
   required int worldId,
 });
 typedef $$RoomsTableUpdateCompanionBuilder = RoomsCompanion Function({
   Value<int> id,
   Value<String> name,
+  Value<String> description,
   Value<int> worldId,
 });
 
@@ -601,21 +714,25 @@ class $$RoomsTableTableManager extends RootTableManager<
           getUpdateCompanionBuilder: ({
             Value<int> id = const Value.absent(),
             Value<String> name = const Value.absent(),
+            Value<String> description = const Value.absent(),
             Value<int> worldId = const Value.absent(),
           }) =>
               RoomsCompanion(
             id: id,
             name: name,
+            description: description,
             worldId: worldId,
           ),
           getInsertCompanionBuilder: ({
             Value<int> id = const Value.absent(),
             required String name,
+            required String description,
             required int worldId,
           }) =>
               RoomsCompanion.insert(
             id: id,
             name: name,
+            description: description,
             worldId: worldId,
           ),
         ));
@@ -646,6 +763,11 @@ class $$RoomsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<String> get description => $state.composableBuilder(
+      column: $state.table.description,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   $$WorldsTableFilterComposer get worldId {
     final $$WorldsTableFilterComposer composer = $state.composerBuilder(
         composer: this,
@@ -669,6 +791,11 @@ class $$RoomsTableOrderingComposer
 
   ColumnOrderings<String> get name => $state.composableBuilder(
       column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get description => $state.composableBuilder(
+      column: $state.table.description,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 

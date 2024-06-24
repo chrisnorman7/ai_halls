@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   dart_openai: ^5.1.0
   drift: ^2.18.0
+  drift_editors: ^0.1.0
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.5.1
@@ -38,5 +39,3 @@ dev_dependencies:
   riverpod_lint: ^2.3.12
 flutter:
   uses-material-design: true
-  assets:
-    - assets/room_schema.json

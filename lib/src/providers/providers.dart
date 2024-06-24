@@ -59,3 +59,10 @@ Future<List<World>> worlds(final WorldsRef ref) {
   final database = ref.watch(databaseProvider);
   return database.worldsDao.getWorlds();
 }
+
+/// Provide a single world.
+@riverpod
+Future<World> world(final WorldRef ref, final int id) {
+  final database = ref.watch(databaseProvider);
+  return database.worldsDao.getWorld(id);
+}

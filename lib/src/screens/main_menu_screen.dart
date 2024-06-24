@@ -6,7 +6,7 @@ import 'package:flutter_soloud/flutter_soloud.dart';
 
 import '../database/database.dart';
 import '../providers/providers.dart';
-import 'worlds_screen.dart';
+import 'worlds/worlds_screen.dart';
 
 /// The main menu for the game.
 class MainMenuScreen extends ConsumerStatefulWidget {

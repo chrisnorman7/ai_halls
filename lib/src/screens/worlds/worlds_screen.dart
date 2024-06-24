@@ -5,8 +5,9 @@ import 'package:backstreets_widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/providers.dart';
-import 'game_options_screen.dart';
+import '../../providers/providers.dart';
+import '../game_options_screen.dart';
+import 'edit_world_screen.dart';
 
 /// The worlds screen.
 class WorldsScreen extends ConsumerWidget {
@@ -44,7 +45,10 @@ class WorldsScreen extends ConsumerWidget {
                     autofocus: world.id == worlds.first.id,
                     title: Text(world.name),
                     subtitle: Text(world.description),
-                    onTap: () {},
+                    onTap: () => context.pushWidgetBuilder(
+                      (final builderContext) =>
+                          EditWorldScreen(worldId: world.id),
+                    ),
                   ),
                 ),
               ),

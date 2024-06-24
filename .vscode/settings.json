@@ -4,9 +4,11 @@
     "Colors",
     "daos",
     "deinit",
+    "gpt",
     "openai",
     "riverpod",
     "soloud",
-    "tts"
+    "tts",
+    "writeln"
   ]
 }
