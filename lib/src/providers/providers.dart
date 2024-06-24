@@ -66,3 +66,10 @@ Future<World> world(final WorldRef ref, final int id) {
   final database = ref.watch(databaseProvider);
   return database.worldsDao.getWorld(id);
 }
+
+/// Provide a single room.
+@riverpod
+Future<Room> room(final RoomRef ref, final int roomId) {
+  final database = ref.watch(databaseProvider);
+  return database.roomsDao.getRoom(roomId);
+}

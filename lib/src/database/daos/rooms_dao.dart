@@ -16,12 +16,16 @@ class RoomsDao extends DatabaseAccessor<Database> with _$RoomsDaoMixin {
     required final World world,
     required final String name,
     required final String description,
+    required final int width,
+    required final int length,
   }) =>
       db.managers.rooms.createReturning(
         (final o) => o(
           worldId: world.id,
           name: name,
           description: description,
+          width: width,
+          length: length,
         ),
       );
 

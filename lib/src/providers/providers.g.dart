@@ -263,5 +263,142 @@ class _WorldProviderElement extends AutoDisposeFutureProviderElement<World>
   @override
   int get id => (origin as WorldProvider).id;
 }
+
+String _$roomHash() => r'5462040f436de023a051e24d08eeb6e7ae3c3322';
+
+/// Provide a single room.
+///
+/// Copied from [room].
+@ProviderFor(room)
+const roomProvider = RoomFamily();
+
+/// Provide a single room.
+///
+/// Copied from [room].
+class RoomFamily extends Family<AsyncValue<Room>> {
+  /// Provide a single room.
+  ///
+  /// Copied from [room].
+  const RoomFamily();
+
+  /// Provide a single room.
+  ///
+  /// Copied from [room].
+  RoomProvider call(
+    int roomId,
+  ) {
+    return RoomProvider(
+      roomId,
+    );
+  }
+
+  @override
+  RoomProvider getProviderOverride(
+    covariant RoomProvider provider,
+  ) {
+    return call(
+      provider.roomId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'roomProvider';
+}
+
+/// Provide a single room.
+///
+/// Copied from [room].
+class RoomProvider extends AutoDisposeFutureProvider<Room> {
+  /// Provide a single room.
+  ///
+  /// Copied from [room].
+  RoomProvider(
+    int roomId,
+  ) : this._internal(
+          (ref) => room(
+            ref as RoomRef,
+            roomId,
+          ),
+          from: roomProvider,
+          name: r'roomProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product') ? null : _$roomHash,
+          dependencies: RoomFamily._dependencies,
+          allTransitiveDependencies: RoomFamily._allTransitiveDependencies,
+          roomId: roomId,
+        );
+
+  RoomProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.roomId,
+  }) : super.internal();
+
+  final int roomId;
+
+  @override
+  Override overrideWith(
+    FutureOr<Room> Function(RoomRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: RoomProvider._internal(
+        (ref) => create(ref as RoomRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        roomId: roomId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Room> createElement() {
+    return _RoomProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RoomProvider && other.roomId == roomId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, roomId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin RoomRef on AutoDisposeFutureProviderRef<Room> {
+  /// The parameter `roomId` of this provider.
+  int get roomId;
+}
+
+class _RoomProviderElement extends AutoDisposeFutureProviderElement<Room>
+    with RoomRef {
+  _RoomProviderElement(super.provider);
+
+  @override
+  int get roomId => (origin as RoomProvider).roomId;
+}
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

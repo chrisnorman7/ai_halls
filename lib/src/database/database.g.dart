@@ -299,8 +299,19 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES worlds (id) ON DELETE CASCADE'));
+  static const VerificationMeta _widthMeta = const VerificationMeta('width');
   @override
-  List<GeneratedColumn> get $columns => [id, name, description, worldId];
+  late final GeneratedColumn<int> width = GeneratedColumn<int>(
+      'width', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lengthMeta = const VerificationMeta('length');
+  @override
+  late final GeneratedColumn<int> length = GeneratedColumn<int>(
+      'length', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, description, worldId, width, length];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -334,6 +345,18 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     } else if (isInserting) {
       context.missing(_worldIdMeta);
     }
+    if (data.containsKey('width')) {
+      context.handle(
+          _widthMeta, width.isAcceptableOrUnknown(data['width']!, _widthMeta));
+    } else if (isInserting) {
+      context.missing(_widthMeta);
+    }
+    if (data.containsKey('length')) {
+      context.handle(_lengthMeta,
+          length.isAcceptableOrUnknown(data['length']!, _lengthMeta));
+    } else if (isInserting) {
+      context.missing(_lengthMeta);
+    }
     return context;
   }
 
@@ -351,6 +374,10 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
       worldId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}world_id'])!,
+      width: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}width'])!,
+      length: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}length'])!,
     );
   }
 
@@ -372,11 +399,19 @@ class Room extends DataClass implements Insertable<Room> {
 
   /// The ID of the world which rooms belong to.
   final int worldId;
+
+  /// The maximum x coordinate.
+  final int width;
+
+  /// The maximum y coordinate.
+  final int length;
   const Room(
       {required this.id,
       required this.name,
       required this.description,
-      required this.worldId});
+      required this.worldId,
+      required this.width,
+      required this.length});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -384,6 +419,8 @@ class Room extends DataClass implements Insertable<Room> {
     map['name'] = Variable<String>(name);
     map['description'] = Variable<String>(description);
     map['world_id'] = Variable<int>(worldId);
+    map['width'] = Variable<int>(width);
+    map['length'] = Variable<int>(length);
     return map;
   }
 
@@ -393,6 +430,8 @@ class Room extends DataClass implements Insertable<Room> {
       name: Value(name),
       description: Value(description),
       worldId: Value(worldId),
+      width: Value(width),
+      length: Value(length),
     );
   }
 
@@ -404,6 +443,8 @@ class Room extends DataClass implements Insertable<Room> {
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String>(json['description']),
       worldId: serializer.fromJson<int>(json['worldId']),
+      width: serializer.fromJson<int>(json['width']),
+      length: serializer.fromJson<int>(json['length']),
     );
   }
   @override
@@ -414,15 +455,25 @@ class Room extends DataClass implements Insertable<Room> {
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String>(description),
       'worldId': serializer.toJson<int>(worldId),
+      'width': serializer.toJson<int>(width),
+      'length': serializer.toJson<int>(length),
     };
   }
 
-  Room copyWith({int? id, String? name, String? description, int? worldId}) =>
+  Room copyWith(
+          {int? id,
+          String? name,
+          String? description,
+          int? worldId,
+          int? width,
+          int? length}) =>
       Room(
         id: id ?? this.id,
         name: name ?? this.name,
         description: description ?? this.description,
         worldId: worldId ?? this.worldId,
+        width: width ?? this.width,
+        length: length ?? this.length,
       );
   @override
   String toString() {
@@ -430,13 +481,16 @@ class Room extends DataClass implements Insertable<Room> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
-          ..write('worldId: $worldId')
+          ..write('worldId: $worldId, ')
+          ..write('width: $width, ')
+          ..write('length: $length')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, worldId);
+  int get hashCode =>
+      Object.hash(id, name, description, worldId, width, length);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -444,7 +498,9 @@ class Room extends DataClass implements Insertable<Room> {
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
-          other.worldId == this.worldId);
+          other.worldId == this.worldId &&
+          other.width == this.width &&
+          other.length == this.length);
 }
 
 class RoomsCompanion extends UpdateCompanion<Room> {
@@ -452,31 +508,43 @@ class RoomsCompanion extends UpdateCompanion<Room> {
   final Value<String> name;
   final Value<String> description;
   final Value<int> worldId;
+  final Value<int> width;
+  final Value<int> length;
   const RoomsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.worldId = const Value.absent(),
+    this.width = const Value.absent(),
+    this.length = const Value.absent(),
   });
   RoomsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String description,
     required int worldId,
+    required int width,
+    required int length,
   })  : name = Value(name),
         description = Value(description),
-        worldId = Value(worldId);
+        worldId = Value(worldId),
+        width = Value(width),
+        length = Value(length);
   static Insertable<Room> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? description,
     Expression<int>? worldId,
+    Expression<int>? width,
+    Expression<int>? length,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (worldId != null) 'world_id': worldId,
+      if (width != null) 'width': width,
+      if (length != null) 'length': length,
     });
   }
 
@@ -484,12 +552,16 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       {Value<int>? id,
       Value<String>? name,
       Value<String>? description,
-      Value<int>? worldId}) {
+      Value<int>? worldId,
+      Value<int>? width,
+      Value<int>? length}) {
     return RoomsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
       worldId: worldId ?? this.worldId,
+      width: width ?? this.width,
+      length: length ?? this.length,
     );
   }
 
@@ -508,6 +580,12 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     if (worldId.present) {
       map['world_id'] = Variable<int>(worldId.value);
     }
+    if (width.present) {
+      map['width'] = Variable<int>(width.value);
+    }
+    if (length.present) {
+      map['length'] = Variable<int>(length.value);
+    }
     return map;
   }
 
@@ -517,7 +595,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
-          ..write('worldId: $worldId')
+          ..write('worldId: $worldId, ')
+          ..write('width: $width, ')
+          ..write('length: $length')
           ..write(')'))
         .toString();
   }
@@ -685,12 +765,16 @@ typedef $$RoomsTableInsertCompanionBuilder = RoomsCompanion Function({
   required String name,
   required String description,
   required int worldId,
+  required int width,
+  required int length,
 });
 typedef $$RoomsTableUpdateCompanionBuilder = RoomsCompanion Function({
   Value<int> id,
   Value<String> name,
   Value<String> description,
   Value<int> worldId,
+  Value<int> width,
+  Value<int> length,
 });
 
 class $$RoomsTableTableManager extends RootTableManager<
@@ -716,24 +800,32 @@ class $$RoomsTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<String> description = const Value.absent(),
             Value<int> worldId = const Value.absent(),
+            Value<int> width = const Value.absent(),
+            Value<int> length = const Value.absent(),
           }) =>
               RoomsCompanion(
             id: id,
             name: name,
             description: description,
             worldId: worldId,
+            width: width,
+            length: length,
           ),
           getInsertCompanionBuilder: ({
             Value<int> id = const Value.absent(),
             required String name,
             required String description,
             required int worldId,
+            required int width,
+            required int length,
           }) =>
               RoomsCompanion.insert(
             id: id,
             name: name,
             description: description,
             worldId: worldId,
+            width: width,
+            length: length,
           ),
         ));
 }
@@ -768,6 +860,16 @@ class $$RoomsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<int> get width => $state.composableBuilder(
+      column: $state.table.width,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get length => $state.composableBuilder(
+      column: $state.table.length,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   $$WorldsTableFilterComposer get worldId {
     final $$WorldsTableFilterComposer composer = $state.composerBuilder(
         composer: this,
@@ -796,6 +898,16 @@ class $$RoomsTableOrderingComposer
 
   ColumnOrderings<String> get description => $state.composableBuilder(
       column: $state.table.description,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get width => $state.composableBuilder(
+      column: $state.table.width,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get length => $state.composableBuilder(
+      column: $state.table.length,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 

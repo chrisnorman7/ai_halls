@@ -28,10 +28,12 @@ class WorldsDao extends DatabaseAccessor<Database> with _$WorldsDaoMixin {
     required final World world,
     final String? name,
     final String? description,
+    final Room? firstRoom,
   }) async {
     final copy = world.copyWith(
       name: name ?? world.name,
       description: description ?? world.description,
+      firstRoomId: Value(firstRoom?.id),
     );
     await db.managers.worlds.replace(copy);
     return copy;

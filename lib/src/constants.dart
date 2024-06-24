@@ -68,12 +68,16 @@ Future<GeneratedRoom> generateRoom({
     ..writeln('You are helping build a world called "${world.name}".')
     ..writeln('The description of this world is: ${world.description}')
     ..writeln('Ensure all rooms conform to the following JSON schema:')
-    ..writeln(jsonEncode(roomJson))
-    ..writeln('The current rooms in the world are:');
+    ..writeln(jsonEncode(roomJson));
   final database = ref.read(databaseProvider);
   final rooms = await database.roomsDao.getRooms(world);
-  for (final room in rooms) {
-    stringBuffer.writeln('${room.name}: ${room.description}');
+  if (rooms.isNotEmpty) {
+    stringBuffer.writeln('The current rooms in the world are:');
+    for (final room in rooms) {
+      stringBuffer.writeln('${room.name}: ${room.description}');
+    }
+  } else {
+    stringBuffer.writeln('No rooms have been created yet.');
   }
   stringBuffer.writeln(
     'When creating rooms, create at least one object and one exit.',
