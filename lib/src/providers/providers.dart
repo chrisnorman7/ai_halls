@@ -47,17 +47,15 @@ FlutterTts tts(final TtsRef ref) => FlutterTts();
 
 /// Provide the database.
 @Riverpod(keepAlive: true)
-Future<Database> database(final DatabaseRef ref) async {
-  final directory = await ref.read(stateDirectoryProvider.future);
-  final file = File(path.join(directory.path, 'db.sqlite3'));
-  final database = Database(file);
+Database database(final DatabaseRef ref) {
+  final database = Database();
   ref.onDispose(database.close);
   return database;
 }
 
 /// Provide all worlds.
 @riverpod
-Future<List<World>> worlds(final WorldsRef ref) async {
-  final database = await ref.watch(databaseProvider.future);
+Future<List<World>> worlds(final WorldsRef ref) {
+  final database = ref.watch(databaseProvider);
   return database.worldsDao.getWorlds();
 }

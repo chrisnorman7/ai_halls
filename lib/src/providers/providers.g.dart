@@ -72,13 +72,13 @@ final ttsProvider = AutoDisposeProvider<FlutterTts>.internal(
 );
 
 typedef TtsRef = AutoDisposeProviderRef<FlutterTts>;
-String _$databaseHash() => r'ad63a472ddd58969ade5653d7748d223b7d42edd';
+String _$databaseHash() => r'5e10072adae4d637395b5b8e6a3ca7884e11fa36';
 
 /// Provide the database.
 ///
 /// Copied from [database].
 @ProviderFor(database)
-final databaseProvider = FutureProvider<Database>.internal(
+final databaseProvider = Provider<Database>.internal(
   database,
   name: r'databaseProvider',
   debugGetCreateSourceHash:
@@ -87,8 +87,8 @@ final databaseProvider = FutureProvider<Database>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef DatabaseRef = FutureProviderRef<Database>;
-String _$worldsHash() => r'072c0ff1d798e15df5d2750ae807c0cb22ef27de';
+typedef DatabaseRef = ProviderRef<Database>;
+String _$worldsHash() => r'14e0ad2863d4e737e1b48110813c404a14f21c07';
 
 /// Provide all worlds.
 ///

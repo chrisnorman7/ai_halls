@@ -3,6 +3,7 @@
     "bools",
     "Colors",
     "daos",
+    "deinit",
     "openai",
     "riverpod",
     "soloud",

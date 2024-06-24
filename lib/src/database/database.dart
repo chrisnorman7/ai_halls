@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import 'daos/worlds_dao.dart';
 import 'tables/rooms.dart';
@@ -21,8 +23,25 @@ part 'database.g.dart';
 )
 class Database extends _$Database {
   /// Create an instance.
-  Database(final File? file)
-      : super(file == null ? NativeDatabase.memory() : NativeDatabase(file));
+  Database({final bool useMemory = false})
+      : super(
+          useMemory
+              ? NativeDatabase.memory()
+              : LazyDatabase(
+                  () async {
+                    final documentsDirectory =
+                        await getApplicationDocumentsDirectory();
+                    final fullPath =
+                        path.join(documentsDirectory.path, 'ai_halls');
+                    final directory = Directory(fullPath);
+                    if (!directory.existsSync()) {
+                      directory.createSync(recursive: true);
+                    }
+                    final file = File(path.join(directory.path, 'db.sqlite3'));
+                    return NativeDatabase(file);
+                  },
+                ),
+        );
 
   /// The schema version.
   @override

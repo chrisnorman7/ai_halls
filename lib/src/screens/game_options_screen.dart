@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../extensions.dart';
 import '../providers/providers.dart';
 
 /// The game options screen.
@@ -49,6 +50,11 @@ class GameOptionsScreen extends ConsumerWidget {
                 value: options.ttsRate,
                 onChanged: (final ttsRate) async {
                   options.ttsRate = ttsRate;
+                  final tts = ref.read(ttsProvider);
+                  await tts.setSpeechRate(ttsRate);
+                  await tts.speakInterrupted(
+                    'Rate ${ttsRate.toStringAsFixed(1)}',
+                  );
                   await options.save(ref: ref, invalidateProviders: true);
                 },
                 title: 'TTS Rate',
