@@ -13,7 +13,7 @@ import 'providers/providers.dart';
 typedef JsonMap = Map<String, dynamic>;
 
 /// Generate a room.
-Future<GeneratedRoom> generateRoom({
+Future<Room> generateRoom({
   required final WidgetRef ref,
   required final World world,
 }) async {
@@ -108,5 +108,14 @@ Future<GeneratedRoom> generateRoom({
   if (text == null) {
     throw StateError('The API returned `null`.');
   }
-  return GeneratedRoom.fromJson(jsonDecode(text) as Map<String, dynamic>);
+  final generatedRoom =
+      GeneratedRoom.fromJson(jsonDecode(text) as Map<String, dynamic>);
+  final room = await database.roomsDao.createRoom(
+    world: world,
+    name: generatedRoom.name,
+    description: generatedRoom.description,
+    width: generatedRoom.width,
+    length: generatedRoom.length,
+  );
+  return room;
 }

@@ -110,15 +110,8 @@ class EditWorldScreen extends ConsumerWidget {
 
   /// Generate the first room.
   Future<Room> generateFirstRoom(final WidgetRef ref, final World world) async {
-    final generatedRoom = await generateRoom(ref: ref, world: world);
     final database = ref.read(databaseProvider);
-    final room = await database.roomsDao.createRoom(
-      world: world,
-      name: generatedRoom.name,
-      description: generatedRoom.description,
-      width: generatedRoom.width,
-      length: generatedRoom.length,
-    );
+    final room = await generateRoom(ref: ref, world: world);
     await database.worldsDao.editWorld(world: world, firstRoom: room);
     ref
       ..invalidate(worldsProvider)

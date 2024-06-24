@@ -21,8 +21,8 @@ mixin DescriptionMixin on Table {
 /// Add [x] and [y] columns.
 mixin CoordinatesMixin on Table {
   /// The x coordinate.
-  IntColumn get x => integer().withDefault(const Constant(0))();
+  IntColumn get x => integer()();
 
   /// The y coordinate.
-  IntColumn get y => integer().withDefault(const Constant(0))();
+  IntColumn get y => integer()();
 }

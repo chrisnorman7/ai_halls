@@ -5,8 +5,11 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'daos/room_objects_dao.dart';
 import 'daos/rooms_dao.dart';
 import 'daos/worlds_dao.dart';
+import 'tables/room_exits.dart';
+import 'tables/room_objects.dart';
 import 'tables/rooms.dart';
 import 'tables/worlds.dart';
 
@@ -17,10 +20,13 @@ part 'database.g.dart';
   tables: [
     Rooms,
     Worlds,
+    RoomObjects,
+    RoomExits,
   ],
   daos: [
     WorldsDao,
     RoomsDao,
+    RoomObjectsDao,
   ],
 )
 class Database extends _$Database {
@@ -47,7 +53,7 @@ class Database extends _$Database {
 
   /// The schema version.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Migrate the database.
   @override
@@ -66,6 +72,10 @@ class Database extends _$Database {
           if (from < 3) {
             await m.addColumn(rooms, rooms.width);
             await m.addColumn(rooms, rooms.length);
+          }
+          if (from < 4) {
+            await m.createTable(roomObjects);
+            await m.createTable(roomExits);
           }
         },
       );
