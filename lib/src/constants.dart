@@ -70,15 +70,6 @@ Future<Room> generateRoom({
     ..writeln('Ensure all rooms conform to the following JSON schema:')
     ..writeln(jsonEncode(roomJson));
   final database = ref.read(databaseProvider);
-  final rooms = await database.roomsDao.getRooms(world);
-  if (rooms.isNotEmpty) {
-    stringBuffer.writeln('The current rooms in the world are:');
-    for (final room in rooms) {
-      stringBuffer.writeln('${room.name}: ${room.description}');
-    }
-  } else {
-    stringBuffer.writeln('No rooms have been created yet.');
-  }
   stringBuffer.writeln(
     'When creating rooms, create at least one object and one exit.',
   );
@@ -90,32 +81,62 @@ Future<Room> generateRoom({
     ],
     role: OpenAIChatMessageRole.assistant,
   );
+  final rooms = await database.roomsDao.getRooms(world);
+  final String prompt;
+  if (rooms.isEmpty) {
+    prompt = 'Create the initial room for this world.';
+  } else {
+    prompt = 'Create a room for this world.';
+  }
   final instructionMessage = OpenAIChatCompletionChoiceMessageModel(
     role: OpenAIChatMessageRole.user,
     content: [
-      OpenAIChatCompletionChoiceMessageContentItemModel.text(
-        'Create the initial room for this world.',
-      ),
+      OpenAIChatCompletionChoiceMessageContentItemModel.text(prompt),
     ],
   );
+  final messages = [systemMessage];
+  for (final room in rooms) {
+    messages.addAll(
+      [
+        OpenAIChatCompletionChoiceMessageModel(
+          role: OpenAIChatMessageRole.user,
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(room.prompt),
+          ],
+        ),
+        OpenAIChatCompletionChoiceMessageModel(
+          role: OpenAIChatMessageRole.system,
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              room.jsonSchema,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  messages.add(instructionMessage);
   final chat = await api.chat.create(
     model: 'gpt-3.5-turbo-1106',
     responseFormat: {'type': 'json_object'},
-    messages: [systemMessage, instructionMessage],
+    messages: messages,
   );
   final choice = chat.choices.first.message;
   final text = choice.content?.single.text;
   if (text == null) {
     throw StateError('The API returned `null`.');
   }
-  final generatedRoom =
-      GeneratedRoom.fromJson(jsonDecode(text) as Map<String, dynamic>);
+  final generatedRoom = GeneratedRoom.fromJson(
+    jsonDecode(text) as Map<String, dynamic>,
+  );
   final room = await database.roomsDao.createRoom(
     world: world,
     name: generatedRoom.name,
     description: generatedRoom.description,
     width: generatedRoom.width,
     length: generatedRoom.length,
+    prompt: prompt,
+    jsonSchema: text,
   );
   return room;
 }

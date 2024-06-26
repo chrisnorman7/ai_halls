@@ -18,6 +18,8 @@ class RoomsDao extends DatabaseAccessor<Database> with _$RoomsDaoMixin {
     required final String description,
     required final int width,
     required final int length,
+    required final String prompt,
+    required final String jsonSchema,
   }) =>
       db.managers.rooms.createReturning(
         (final o) => o(
@@ -26,6 +28,8 @@ class RoomsDao extends DatabaseAccessor<Database> with _$RoomsDaoMixin {
           description: description,
           width: width,
           length: length,
+          prompt: prompt,
+          jsonSchema: jsonSchema,
         ),
       );
 
@@ -51,11 +55,13 @@ class RoomsDao extends DatabaseAccessor<Database> with _$RoomsDaoMixin {
   Future<Room> getRoom(final int id) =>
       db.managers.rooms.filter((final o) => o.id(id)).getSingle();
 
-  /// Get all the rooms in [world].
-  Future<List<Room>> getRooms(final World world) {
-    final query = select(rooms)
-      ..where((final table) => table.worldId.equals(world.id))
-      ..orderBy([(final table) => OrderingTerm.asc(table.name)]);
-    return query.get();
-  }
+  /// Get all the rooms in [world], sorted by creation time.
+  Future<List<Room>> getRooms(final World world) => db.managers.rooms
+      .filter(
+        (final f) => f.worldId.id.equals(world.id),
+      )
+      .orderBy(
+        (final o) => o.createdAt.asc(),
+      )
+      .get();
 }

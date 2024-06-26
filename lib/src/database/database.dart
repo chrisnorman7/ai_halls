@@ -53,7 +53,7 @@ class Database extends _$Database {
 
   /// The schema version.
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 1;
 
   /// Migrate the database.
   @override
@@ -64,19 +64,6 @@ class Database extends _$Database {
         onCreate: (final m) async {
           await m.createAll();
         },
-        onUpgrade: (final m, final from, final to) async {
-          if (from < 2) {
-            await m.addColumn(worlds, worlds.firstRoomId);
-            await m.addColumn(rooms, rooms.description);
-          }
-          if (from < 3) {
-            await m.addColumn(rooms, rooms.width);
-            await m.addColumn(rooms, rooms.length);
-          }
-          if (from < 4) {
-            await m.createTable(roomObjects);
-            await m.createTable(roomExits);
-          }
-        },
+        onUpgrade: (final m, final from, final to) async {},
       );
 }
