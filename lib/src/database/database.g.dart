@@ -1117,7 +1117,7 @@ class $RoomExitsTable extends RoomExits
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES rooms (id) ON DELETE CASCADE'));
+          'REFERENCES rooms (id) ON DELETE SET NULL'));
   @override
   List<GeneratedColumn> get $columns =>
       [id, name, description, x, y, locationId, destinationId];
@@ -1492,7 +1492,7 @@ abstract class _$Database extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('rooms',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('room_exits', kind: UpdateKind.delete),
+              TableUpdate('room_exits', kind: UpdateKind.update),
             ],
           ),
         ],
@@ -1785,33 +1785,7 @@ class $$RoomsTableFilterComposer
     return composer;
   }
 
-  ComposableFilter roomObjectsRefs(
-      ComposableFilter Function($$RoomObjectsTableFilterComposer f) f) {
-    final $$RoomObjectsTableFilterComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $state.db.roomObjects,
-        getReferencedColumn: (t) => t.locationId,
-        builder: (joinBuilder, parentComposers) =>
-            $$RoomObjectsTableFilterComposer(ComposerState($state.db,
-                $state.db.roomObjects, joinBuilder, parentComposers)));
-    return f(composer);
-  }
-
-  ComposableFilter exits(
-      ComposableFilter Function($$RoomExitsTableFilterComposer f) f) {
-    final $$RoomExitsTableFilterComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $state.db.roomExits,
-        getReferencedColumn: (t) => t.locationId,
-        builder: (joinBuilder, parentComposers) =>
-            $$RoomExitsTableFilterComposer(ComposerState(
-                $state.db, $state.db.roomExits, joinBuilder, parentComposers)));
-    return f(composer);
-  }
-
-  ComposableFilter entrances(
+  ComposableFilter destination(
       ComposableFilter Function($$RoomExitsTableFilterComposer f) f) {
     final $$RoomExitsTableFilterComposer composer = $state.composerBuilder(
         composer: this,
