@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,5 +139,21 @@ Future<Room> generateRoom({
     prompt: prompt,
     jsonSchema: text,
   );
+  for (final object in generatedRoom.objects) {
+    await database.roomObjectsDao.createRoomObject(
+      location: room,
+      name: object.name,
+      description: object.description,
+      coordinates: Point(object.x, object.y),
+    );
+  }
+  for (final exit in generatedRoom.exits) {
+    await database.roomExitsDao.createRoomExit(
+      location: room,
+      name: exit.name,
+      description: exit.description,
+      coordinates: Point(exit.x, exit.y),
+    );
+  }
   return room;
 }
