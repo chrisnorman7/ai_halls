@@ -7,7 +7,7 @@ import 'rooms.dart';
 class RoomExits extends Table
     with IdMixin, NameMixin, DescriptionMixin, CoordinatesMixin {
   /// The ID of the room this exit resides in.
-  @ReferenceName('location')
+  @ReferenceName('origin')
   IntColumn get locationId =>
       integer().references(Rooms, #id, onDelete: KeyAction.cascade)();
 

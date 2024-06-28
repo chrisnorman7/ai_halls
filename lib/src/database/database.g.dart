@@ -1458,6 +1458,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final WorldsDao worldsDao = WorldsDao(this as Database);
   late final RoomsDao roomsDao = RoomsDao(this as Database);
   late final RoomObjectsDao roomObjectsDao = RoomObjectsDao(this as Database);
+  late final RoomExitsDao roomExitsDao = RoomExitsDao(this as Database);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1783,6 +1784,32 @@ class $$RoomsTableFilterComposer
             ComposerState(
                 $state.db, $state.db.worlds, joinBuilder, parentComposers)));
     return composer;
+  }
+
+  ComposableFilter location(
+      ComposableFilter Function($$RoomObjectsTableFilterComposer f) f) {
+    final $$RoomObjectsTableFilterComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $state.db.roomObjects,
+        getReferencedColumn: (t) => t.locationId,
+        builder: (joinBuilder, parentComposers) =>
+            $$RoomObjectsTableFilterComposer(ComposerState($state.db,
+                $state.db.roomObjects, joinBuilder, parentComposers)));
+    return f(composer);
+  }
+
+  ComposableFilter origin(
+      ComposableFilter Function($$RoomExitsTableFilterComposer f) f) {
+    final $$RoomExitsTableFilterComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $state.db.roomExits,
+        getReferencedColumn: (t) => t.locationId,
+        builder: (joinBuilder, parentComposers) =>
+            $$RoomExitsTableFilterComposer(ComposerState(
+                $state.db, $state.db.roomExits, joinBuilder, parentComposers)));
+    return f(composer);
   }
 
   ComposableFilter destination(

@@ -5,9 +5,8 @@ import 'worlds.dart';
 
 /// The rooms table.
 class Rooms extends Table with IdMixin, NameMixin, DescriptionMixin {
-  @ReferenceName('world')
-
   /// The ID of the world which rooms belong to.
+  @ReferenceName('world')
   IntColumn get worldId =>
       integer().references(Worlds, #id, onDelete: KeyAction.cascade)();
 

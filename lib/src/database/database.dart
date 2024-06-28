@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'daos/room_exits_dao.dart';
 import 'daos/room_objects_dao.dart';
 import 'daos/rooms_dao.dart';
 import 'daos/worlds_dao.dart';
@@ -27,6 +28,7 @@ part 'database.g.dart';
     WorldsDao,
     RoomsDao,
     RoomObjectsDao,
+    RoomExitsDao,
   ],
 )
 class Database extends _$Database {
