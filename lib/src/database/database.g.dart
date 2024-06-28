@@ -309,9 +309,37 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
   late final GeneratedColumn<int> length = GeneratedColumn<int>(
       'length', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, description, worldId, width, length];
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _promptMeta = const VerificationMeta('prompt');
+  @override
+  late final GeneratedColumn<String> prompt = GeneratedColumn<String>(
+      'prompt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _jsonSchemaMeta =
+      const VerificationMeta('jsonSchema');
+  @override
+  late final GeneratedColumn<String> jsonSchema = GeneratedColumn<String>(
+      'json_schema', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        description,
+        worldId,
+        width,
+        length,
+        createdAt,
+        prompt,
+        jsonSchema
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -357,6 +385,24 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     } else if (isInserting) {
       context.missing(_lengthMeta);
     }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('prompt')) {
+      context.handle(_promptMeta,
+          prompt.isAcceptableOrUnknown(data['prompt']!, _promptMeta));
+    } else if (isInserting) {
+      context.missing(_promptMeta);
+    }
+    if (data.containsKey('json_schema')) {
+      context.handle(
+          _jsonSchemaMeta,
+          jsonSchema.isAcceptableOrUnknown(
+              data['json_schema']!, _jsonSchemaMeta));
+    } else if (isInserting) {
+      context.missing(_jsonSchemaMeta);
+    }
     return context;
   }
 
@@ -378,6 +424,12 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
           .read(DriftSqlType.int, data['${effectivePrefix}width'])!,
       length: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}length'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      prompt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}prompt'])!,
+      jsonSchema: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}json_schema'])!,
     );
   }
 
@@ -405,13 +457,25 @@ class Room extends DataClass implements Insertable<Room> {
 
   /// The maximum y coordinate.
   final int length;
+
+  /// The time this room was created at.
+  final DateTime createdAt;
+
+  /// The prompt which generated this room.
+  final String prompt;
+
+  /// The JSON response from GPT.
+  final String jsonSchema;
   const Room(
       {required this.id,
       required this.name,
       required this.description,
       required this.worldId,
       required this.width,
-      required this.length});
+      required this.length,
+      required this.createdAt,
+      required this.prompt,
+      required this.jsonSchema});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -421,6 +485,9 @@ class Room extends DataClass implements Insertable<Room> {
     map['world_id'] = Variable<int>(worldId);
     map['width'] = Variable<int>(width);
     map['length'] = Variable<int>(length);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['prompt'] = Variable<String>(prompt);
+    map['json_schema'] = Variable<String>(jsonSchema);
     return map;
   }
 
@@ -432,6 +499,9 @@ class Room extends DataClass implements Insertable<Room> {
       worldId: Value(worldId),
       width: Value(width),
       length: Value(length),
+      createdAt: Value(createdAt),
+      prompt: Value(prompt),
+      jsonSchema: Value(jsonSchema),
     );
   }
 
@@ -445,6 +515,9 @@ class Room extends DataClass implements Insertable<Room> {
       worldId: serializer.fromJson<int>(json['worldId']),
       width: serializer.fromJson<int>(json['width']),
       length: serializer.fromJson<int>(json['length']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      prompt: serializer.fromJson<String>(json['prompt']),
+      jsonSchema: serializer.fromJson<String>(json['jsonSchema']),
     );
   }
   @override
@@ -457,6 +530,9 @@ class Room extends DataClass implements Insertable<Room> {
       'worldId': serializer.toJson<int>(worldId),
       'width': serializer.toJson<int>(width),
       'length': serializer.toJson<int>(length),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'prompt': serializer.toJson<String>(prompt),
+      'jsonSchema': serializer.toJson<String>(jsonSchema),
     };
   }
 
@@ -466,7 +542,10 @@ class Room extends DataClass implements Insertable<Room> {
           String? description,
           int? worldId,
           int? width,
-          int? length}) =>
+          int? length,
+          DateTime? createdAt,
+          String? prompt,
+          String? jsonSchema}) =>
       Room(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -474,6 +553,9 @@ class Room extends DataClass implements Insertable<Room> {
         worldId: worldId ?? this.worldId,
         width: width ?? this.width,
         length: length ?? this.length,
+        createdAt: createdAt ?? this.createdAt,
+        prompt: prompt ?? this.prompt,
+        jsonSchema: jsonSchema ?? this.jsonSchema,
       );
   @override
   String toString() {
@@ -483,14 +565,17 @@ class Room extends DataClass implements Insertable<Room> {
           ..write('description: $description, ')
           ..write('worldId: $worldId, ')
           ..write('width: $width, ')
-          ..write('length: $length')
+          ..write('length: $length, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('prompt: $prompt, ')
+          ..write('jsonSchema: $jsonSchema')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, description, worldId, width, length);
+  int get hashCode => Object.hash(id, name, description, worldId, width, length,
+      createdAt, prompt, jsonSchema);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -500,7 +585,10 @@ class Room extends DataClass implements Insertable<Room> {
           other.description == this.description &&
           other.worldId == this.worldId &&
           other.width == this.width &&
-          other.length == this.length);
+          other.length == this.length &&
+          other.createdAt == this.createdAt &&
+          other.prompt == this.prompt &&
+          other.jsonSchema == this.jsonSchema);
 }
 
 class RoomsCompanion extends UpdateCompanion<Room> {
@@ -510,6 +598,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
   final Value<int> worldId;
   final Value<int> width;
   final Value<int> length;
+  final Value<DateTime> createdAt;
+  final Value<String> prompt;
+  final Value<String> jsonSchema;
   const RoomsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -517,6 +608,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     this.worldId = const Value.absent(),
     this.width = const Value.absent(),
     this.length = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.prompt = const Value.absent(),
+    this.jsonSchema = const Value.absent(),
   });
   RoomsCompanion.insert({
     this.id = const Value.absent(),
@@ -525,11 +619,16 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     required int worldId,
     required int width,
     required int length,
+    this.createdAt = const Value.absent(),
+    required String prompt,
+    required String jsonSchema,
   })  : name = Value(name),
         description = Value(description),
         worldId = Value(worldId),
         width = Value(width),
-        length = Value(length);
+        length = Value(length),
+        prompt = Value(prompt),
+        jsonSchema = Value(jsonSchema);
   static Insertable<Room> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -537,6 +636,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     Expression<int>? worldId,
     Expression<int>? width,
     Expression<int>? length,
+    Expression<DateTime>? createdAt,
+    Expression<String>? prompt,
+    Expression<String>? jsonSchema,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -545,6 +647,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       if (worldId != null) 'world_id': worldId,
       if (width != null) 'width': width,
       if (length != null) 'length': length,
+      if (createdAt != null) 'created_at': createdAt,
+      if (prompt != null) 'prompt': prompt,
+      if (jsonSchema != null) 'json_schema': jsonSchema,
     });
   }
 
@@ -554,7 +659,10 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       Value<String>? description,
       Value<int>? worldId,
       Value<int>? width,
-      Value<int>? length}) {
+      Value<int>? length,
+      Value<DateTime>? createdAt,
+      Value<String>? prompt,
+      Value<String>? jsonSchema}) {
     return RoomsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -562,6 +670,9 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       worldId: worldId ?? this.worldId,
       width: width ?? this.width,
       length: length ?? this.length,
+      createdAt: createdAt ?? this.createdAt,
+      prompt: prompt ?? this.prompt,
+      jsonSchema: jsonSchema ?? this.jsonSchema,
     );
   }
 
@@ -586,6 +697,15 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     if (length.present) {
       map['length'] = Variable<int>(length.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (prompt.present) {
+      map['prompt'] = Variable<String>(prompt.value);
+    }
+    if (jsonSchema.present) {
+      map['json_schema'] = Variable<String>(jsonSchema.value);
+    }
     return map;
   }
 
@@ -597,7 +717,10 @@ class RoomsCompanion extends UpdateCompanion<Room> {
           ..write('description: $description, ')
           ..write('worldId: $worldId, ')
           ..write('width: $width, ')
-          ..write('length: $length')
+          ..write('length: $length, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('prompt: $prompt, ')
+          ..write('jsonSchema: $jsonSchema')
           ..write(')'))
         .toString();
   }
@@ -994,7 +1117,7 @@ class $RoomExitsTable extends RoomExits
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES rooms (id) ON DELETE CASCADE'));
+          'REFERENCES rooms (id) ON DELETE SET NULL'));
   @override
   List<GeneratedColumn> get $columns =>
       [id, name, description, x, y, locationId, destinationId];
@@ -1369,7 +1492,7 @@ abstract class _$Database extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('rooms',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('room_exits', kind: UpdateKind.delete),
+              TableUpdate('room_exits', kind: UpdateKind.update),
             ],
           ),
         ],
@@ -1469,7 +1592,7 @@ class $$WorldsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
-  ComposableFilter roomsRefs(
+  ComposableFilter world(
       ComposableFilter Function($$RoomsTableFilterComposer f) f) {
     final $$RoomsTableFilterComposer composer = $state.composerBuilder(
         composer: this,
@@ -1514,6 +1637,9 @@ typedef $$RoomsTableInsertCompanionBuilder = RoomsCompanion Function({
   required int worldId,
   required int width,
   required int length,
+  Value<DateTime> createdAt,
+  required String prompt,
+  required String jsonSchema,
 });
 typedef $$RoomsTableUpdateCompanionBuilder = RoomsCompanion Function({
   Value<int> id,
@@ -1522,6 +1648,9 @@ typedef $$RoomsTableUpdateCompanionBuilder = RoomsCompanion Function({
   Value<int> worldId,
   Value<int> width,
   Value<int> length,
+  Value<DateTime> createdAt,
+  Value<String> prompt,
+  Value<String> jsonSchema,
 });
 
 class $$RoomsTableTableManager extends RootTableManager<
@@ -1549,6 +1678,9 @@ class $$RoomsTableTableManager extends RootTableManager<
             Value<int> worldId = const Value.absent(),
             Value<int> width = const Value.absent(),
             Value<int> length = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String> prompt = const Value.absent(),
+            Value<String> jsonSchema = const Value.absent(),
           }) =>
               RoomsCompanion(
             id: id,
@@ -1557,6 +1689,9 @@ class $$RoomsTableTableManager extends RootTableManager<
             worldId: worldId,
             width: width,
             length: length,
+            createdAt: createdAt,
+            prompt: prompt,
+            jsonSchema: jsonSchema,
           ),
           getInsertCompanionBuilder: ({
             Value<int> id = const Value.absent(),
@@ -1565,6 +1700,9 @@ class $$RoomsTableTableManager extends RootTableManager<
             required int worldId,
             required int width,
             required int length,
+            Value<DateTime> createdAt = const Value.absent(),
+            required String prompt,
+            required String jsonSchema,
           }) =>
               RoomsCompanion.insert(
             id: id,
@@ -1573,6 +1711,9 @@ class $$RoomsTableTableManager extends RootTableManager<
             worldId: worldId,
             width: width,
             length: length,
+            createdAt: createdAt,
+            prompt: prompt,
+            jsonSchema: jsonSchema,
           ),
         ));
 }
@@ -1617,6 +1758,21 @@ class $$RoomsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<DateTime> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get prompt => $state.composableBuilder(
+      column: $state.table.prompt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get jsonSchema => $state.composableBuilder(
+      column: $state.table.jsonSchema,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   $$WorldsTableFilterComposer get worldId {
     final $$WorldsTableFilterComposer composer = $state.composerBuilder(
         composer: this,
@@ -1629,33 +1785,7 @@ class $$RoomsTableFilterComposer
     return composer;
   }
 
-  ComposableFilter roomObjectsRefs(
-      ComposableFilter Function($$RoomObjectsTableFilterComposer f) f) {
-    final $$RoomObjectsTableFilterComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $state.db.roomObjects,
-        getReferencedColumn: (t) => t.locationId,
-        builder: (joinBuilder, parentComposers) =>
-            $$RoomObjectsTableFilterComposer(ComposerState($state.db,
-                $state.db.roomObjects, joinBuilder, parentComposers)));
-    return f(composer);
-  }
-
-  ComposableFilter exits(
-      ComposableFilter Function($$RoomExitsTableFilterComposer f) f) {
-    final $$RoomExitsTableFilterComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $state.db.roomExits,
-        getReferencedColumn: (t) => t.locationId,
-        builder: (joinBuilder, parentComposers) =>
-            $$RoomExitsTableFilterComposer(ComposerState(
-                $state.db, $state.db.roomExits, joinBuilder, parentComposers)));
-    return f(composer);
-  }
-
-  ComposableFilter entrances(
+  ComposableFilter destination(
       ComposableFilter Function($$RoomExitsTableFilterComposer f) f) {
     final $$RoomExitsTableFilterComposer composer = $state.composerBuilder(
         composer: this,
@@ -1694,6 +1824,21 @@ class $$RoomsTableOrderingComposer
 
   ColumnOrderings<int> get length => $state.composableBuilder(
       column: $state.table.length,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<DateTime> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get prompt => $state.composableBuilder(
+      column: $state.table.prompt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get jsonSchema => $state.composableBuilder(
+      column: $state.table.jsonSchema,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
