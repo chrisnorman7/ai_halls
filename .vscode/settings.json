@@ -4,6 +4,8 @@
     "Colors",
     "daos",
     "deinit",
+    "earcon",
+    "earcons",
     "gpt",
     "openai",
     "riverpod",

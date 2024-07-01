@@ -55,4 +55,15 @@ class RoomObjectsDao extends DatabaseAccessor<Database>
   /// Get a single row by [id].
   Future<RoomObject> getRoomObject(final int id) =>
       db.managers.roomObjects.filter((final o) => o.id(id)).getSingle();
+
+  /// Get all the objects in [room].
+  Future<List<RoomObject>> getRoomObjects(final Room room) =>
+      db.managers.roomObjects
+          .filter(
+            (final f) => f.locationId.id.equals(room.id),
+          )
+          .orderBy(
+            (final o) => o.x.asc(),
+          )
+          .get();
 }

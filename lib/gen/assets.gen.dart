@@ -7,11 +7,18 @@
 // ignore_for_file: type=lint
 // ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
+class $AssetsEarconsGen {
+  const $AssetsEarconsGen();
+
+  /// File path: assets/earcons/object.wav
+  String get object => 'assets/earcons/object.wav';
+
+  /// List of all assets
+  List<String> get values => [object];
+}
+
 class Assets {
   Assets._();
 
-  static const String roomSchema = 'assets/room_schema.json';
-
-  /// List of all assets
-  static List<String> get values => [roomSchema];
+  static const $AssetsEarconsGen earcons = $AssetsEarconsGen();
 }
