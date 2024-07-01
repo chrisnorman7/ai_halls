@@ -101,7 +101,7 @@ class EditWorldScreen extends ConsumerWidget {
             }
             return PlayWorldScreen(worldId: worldId, initialRoomId: room.id);
           },
-          loading: (final _) => const LoadingScreen(),
+          loading: LoadingScreen.new,
           error: ErrorScreen.withPositional,
         ),
       );

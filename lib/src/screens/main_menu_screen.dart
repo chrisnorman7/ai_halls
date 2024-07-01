@@ -41,7 +41,7 @@ class MainMenuScreenState extends ConsumerState<MainMenuScreen> {
     return SimpleFutureBuilder(
       future: future,
       done: (final context, final _) => const WorldsScreen(),
-      loading: (final context) => const LoadingScreen(),
+      loading: LoadingScreen.new,
       error: ErrorScreen.withPositional,
     );
   }
